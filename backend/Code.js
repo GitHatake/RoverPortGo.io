@@ -69,6 +69,18 @@ function checkNewPosts() {
 }
 
 // ==========================================
+// テスト実行用: デモ通知を送信
+// ==========================================
+function testPush() {
+    const mockPost = {
+        title: { rendered: "テスト予行演習" },
+        excerpt: { rendered: "これはテスト通知です。デバイスで受信できるか確認しています。" },
+        link: "https://githatake.github.io/RoverPortGo.io/"
+    };
+    sendPushNotification(mockPost);
+}
+
+// ==========================================
 // FCM HTTP v1 API で送信
 // ==========================================
 function sendPushNotification(post) {

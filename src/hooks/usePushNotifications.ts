@@ -8,7 +8,23 @@ export const usePushNotifications = () => {
 
     useEffect(() => {
         // Check initial permission
-        setNotificationPermission(Notification.permission);
+        const currentPermission = Notification.permission;
+        setNotificationPermission(currentPermission);
+
+        // If permission is already granted, we should verify we have a token
+        if (currentPermission === 'granted') {
+            console.log('Permission granted on mount, fetching existing token...');
+            requestForToken(VAPID_KEY).then(token => {
+                if (token) {
+                    console.log('Existing token restored:', token);
+                    setFcmToken(token);
+                } else {
+                    console.log('No existing token found despite permission.');
+                }
+            }).catch(err => {
+                console.error('Failed to restore token:', err);
+            });
+        }
     }, []);
 
     const requestPermission = async (): Promise<string | null> => {
