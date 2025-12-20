@@ -3,26 +3,37 @@ import { requestForToken, onMessageListener } from '../lib/firebase';
 import { VAPID_KEY } from '../lib/firebase';
 
 export const usePushNotifications = () => {
-    const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
-    const [fcmToken, setFcmToken] = useState<string | null>(null);
+    const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(Notification.permission);
+    const [fcmToken, setFcmToken] = useState<string | null>(localStorage.getItem('fcm_token'));
 
     useEffect(() => {
-        // Check initial permission
+        // Double check permission on mount (state init covers most cases, but good for safety)
         const currentPermission = Notification.permission;
         setNotificationPermission(currentPermission);
 
-        // If permission is already granted, we should verify we have a token
+        const storedToken = localStorage.getItem('fcm_token');
+        if (storedToken) {
+            console.log("Loaded token from storage:", storedToken);
+            setFcmToken(storedToken);
+        }
+
+        // Background verification
         if (currentPermission === 'granted') {
-            console.log('Permission granted on mount, fetching existing token...');
+            console.log('Permission granted, verifying token...');
             requestForToken(VAPID_KEY).then(token => {
                 if (token) {
-                    console.log('Existing token restored:', token);
+                    console.log('Token verified:', token);
                     setFcmToken(token);
+                    localStorage.setItem('fcm_token', token);
                 } else {
-                    console.log('No existing token found despite permission.');
+                    console.warn('No token retrieved from FCM despite permission.');
+                    // Don't clear immediately unless we are sure, to avoid flickering. 
+                    // But if permissions are revoked, we should clear?
+                    // Actually if permission is granted but getToken returns null, it might be a temporary network issue.
+                    // Keep the stored token for UI stability.
                 }
             }).catch(err => {
-                console.error('Failed to restore token:', err);
+                console.error('Token verification failed:', err);
             });
         }
     }, []);
@@ -47,6 +58,7 @@ export const usePushNotifications = () => {
             if (token) {
                 console.log('Token received:', token);
                 setFcmToken(token);
+                localStorage.setItem('fcm_token', token);
                 return token;
             }
             return null;
