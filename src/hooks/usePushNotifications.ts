@@ -11,13 +11,12 @@ export const usePushNotifications = () => {
         setNotificationPermission(Notification.permission);
     }, []);
 
-    const requestPermission = async () => {
+    const requestPermission = async (): Promise<string | null> => {
         try {
+            let token: string | null = null;
             if (Notification.permission === 'granted') {
                 console.log('Permission already granted, requesting token...');
-                const token = await requestForToken(VAPID_KEY);
-                console.log('Token received:', token);
-                if (token) setFcmToken(token);
+                token = await requestForToken(VAPID_KEY);
             } else {
                 console.log('Requesting permission...');
                 const permission = await Notification.requestPermission();
@@ -25,13 +24,19 @@ export const usePushNotifications = () => {
                 setNotificationPermission(permission);
                 if (permission === 'granted') {
                     console.log('Permission granted, requesting token...');
-                    const token = await requestForToken(VAPID_KEY);
-                    console.log('Token received:', token);
-                    if (token) setFcmToken(token);
+                    token = await requestForToken(VAPID_KEY);
                 }
             }
+
+            if (token) {
+                console.log('Token received:', token);
+                setFcmToken(token);
+                return token;
+            }
+            return null;
         } catch (error) {
             console.error('Error requesting notification permission:', error);
+            return null;
         }
     };
 
