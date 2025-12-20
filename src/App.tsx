@@ -2,6 +2,7 @@
 import { Feed } from './components/Feed';
 import { Compass } from 'lucide-react';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { NotificationButton } from './components/NotificationButton';
 
 function App() {
   return (
@@ -12,14 +13,17 @@ function App() {
             <Compass size={28} />
             <span>RoverPortGo</span>
           </div>
-          <a
-            href="https://roverport.rcjweb.jp/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-          >
-            Visit Original Site &rarr;
-          </a>
+          <div className="flex items-center gap-4">
+            <NotificationButton />
+            <a
+              href="https://roverport.rcjweb.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              Visit Original Site &rarr;
+            </a>
+          </div>
         </div>
       </header>
 
