@@ -14,24 +14,47 @@
 
 <body>
   <div id="debug-log"
-    style="position:fixed; top:0; left:0; width:100%; height:100px; overflow:scroll; background:rgba(255,0,0,0.8); color:white; font-size:10px; z-index:9999; pointer-events:none; display:none;">
-  </div>
+    style="position:fixed; top:0; left:0; width:100%; height:200px; overflow:scroll; background:rgba(0,0,0,0.8); color:#0f0; font-family:monospace; font-size:10px; z-index:9999; pointer-events:none; display:block; border-bottom: 2px solid red;">
+    Waiting for logs...<br></div>
 
   <script>
+    // Console proxy
+    (function () {
+      var oldLog = console.log;
+      var oldWarn = console.warn;
+      var oldError = console.error;
+      var logDiv = document.getElementById('debug-log');
+
+      function toScreen(type, args) {
+        try {
+          var msg = Array.from(args).map(a => {
+            if (typeof a === 'object') return JSON.stringify(a);
+            return String(a);
+          }).join(' ');
+          logDiv.innerHTML += '<div style="color:' + (type === 'err' ? 'red' : (type === 'warn' ? 'yellow' : '#0f0')) + '">[' + type + '] ' + msg + '</div>';
+          logDiv.scrollTop = logDiv.scrollHeight;
+        } catch (e) { }
+      }
+
+      console.log = function () { toScreen('log', arguments); oldLog.apply(console, arguments); };
+      console.warn = function () { toScreen('warn', arguments); oldWarn.apply(console, arguments); };
+      console.error = function () { toScreen('err', arguments); oldError.apply(console, arguments); };
+    })();
+
     window.onerror = function (msg, url, line, col, error) {
-      var log = document.getElementById('debug-log');
-      log.style.display = 'block';
-      log.innerHTML += 'E: ' + msg + ' (' + line + ':' + col + ')<br>';
-      // Also log unhandled promise rejections
+      console.error('Window Error: ' + msg + ' (' + line + ':' + col + ')');
     };
     window.onunhandledrejection = function (e) {
-      var log = document.getElementById('debug-log');
-      log.style.display = 'block';
-      log.innerHTML += 'P: ' + e.reason + '<br>';
+      console.error('Unhandled Rejection: ' + e.reason);
     };
   </script>
 
-  <div id="root"></div>
+  <div id="root" style="border: 5px solid blue; min-height: 50vh;">
+    <div style="padding: 20px; text-align: center; color: black;">
+      <h1>Loading App...</h1>
+      <p>If you see this, HTML is loaded but React hasn't mounted yet.</p>
+    </div>
+  </div>
 </body>
 
 </html>
