@@ -21,7 +21,15 @@ export const VAPID_KEY = "BEDZrD84DtgL4NvnxjI_kSLDKxEGXr-bD-ptAE8KaSJkvp9qvPJ_22
 
 export const requestForToken = async (vapidKey: string) => {
     try {
-        const currentToken = await getToken(messaging, { vapidKey });
+        // Explicitly register service worker for GitHub Pages scope
+        const registration = await navigator.serviceWorker.register('/RoverPortGo.io/firebase-messaging-sw.js', {
+            scope: '/RoverPortGo.io/'
+        });
+
+        const currentToken = await getToken(messaging, {
+            vapidKey,
+            serviceWorkerRegistration: registration
+        });
         if (currentToken) {
             console.log('current token for client: ', currentToken);
             return currentToken;
