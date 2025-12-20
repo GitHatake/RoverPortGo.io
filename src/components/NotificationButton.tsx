@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Bell, BellOff, Loader2 } from 'lucide-react';
+import { Bell, BellOff, Loader2, Download } from 'lucide-react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import { usePWA } from '../hooks/usePWA';
 import axios from 'axios';
 
 // NOTE: Ideally invoke this in a useEffect when token changes, but for now we do it on click or token change
@@ -10,8 +11,15 @@ const REGISTER_API_URL = 'https://script.google.com/macros/s/AKfycbzHA5NyGH0KdrZ
 export const NotificationButton = () => {
     const { requestPermission, notificationPermission, fcmToken } = usePushNotifications();
     const [isRegistering, setIsRegistering] = useState(false);
+    const isPWA = usePWA();
 
     const handleClick = async () => {
+        // If not in PWA or Notification API not supported, guide user to install
+        if (!isPWA || !('Notification' in window)) {
+            alert("通知機能を利用するには、画面下部の「共有」ボタンから「ホーム画面に追加」してアプリとして起動してください。");
+            return;
+        }
+
         if (isRegistering) return;
 
         setIsRegistering(true);
@@ -41,7 +49,8 @@ export const NotificationButton = () => {
         }
     };
 
-    const isEnabled = notificationPermission === 'granted' && !!fcmToken;
+    const isEnabled = isPWA && notificationPermission === 'granted' && !!fcmToken;
+    const isSupported = isPWA && ('Notification' in window);
 
     return (
         <button
@@ -51,12 +60,12 @@ export const NotificationButton = () => {
                     ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
                     : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-            title={isEnabled ? "Notifications Enabled" : "Enable Notifications"}
+            title={isEnabled ? "Notifications Enabled" : (isSupported ? "Enable Notifications" : "Install App to Enable Notifications")}
         >
             {isRegistering ? (
                 <Loader2 size={20} className="animate-spin" />
             ) : (
-                isEnabled ? <Bell size={20} /> : <BellOff size={20} />
+                isEnabled ? <Bell size={20} /> : (isSupported ? <BellOff size={20} /> : <Download size={20} />)
             )}
         </button>
     );
