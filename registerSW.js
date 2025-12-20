@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/RoverPortGo.io/sw.js', { scope: '/RoverPortGo.io/' })})}
