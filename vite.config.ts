@@ -10,6 +10,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+      filename: 'sw.ts', // Source file name relative to srcDir
+      strategies: 'injectManifest',
+      srcDir: 'src',
       manifest: {
         name: 'RoverPortGo',
         short_name: 'RoverPortGo',
@@ -33,4 +36,7 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    target: 'es2020', // Fix for iOS 14 / Lower versions
+  }
 })

@@ -21,10 +21,9 @@ export const VAPID_KEY = "BEDZrD84DtgL4NvnxjI_kSLDKxEGXr-bD-ptAE8KaSJkvp9qvPJ_22
 
 export const requestForToken = async (vapidKey: string) => {
     try {
-        // Explicitly register service worker for GitHub Pages scope
-        const registration = await navigator.serviceWorker.register('/RoverPortGo.io/firebase-messaging-sw.js', {
-            scope: '/RoverPortGo.io/'
-        });
+        // Wait for the main Service Worker (which now includes FCM logic) to be ready
+        const registration = await navigator.serviceWorker.ready;
+        console.log('Service Worker ready for FCM:', registration);
 
         const currentToken = await getToken(messaging, {
             vapidKey,
