@@ -9,7 +9,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 text-2xl font-bold text-blue-600 dark:text-blue-400">
             <Compass size={28} />
-            <span>RoverPort Viewer</span>
+            <span>RoverPortGo</span>
           </div>
           <a
             href="https://roverport.rcjweb.jp/"
@@ -23,15 +23,6 @@ function App() {
       </header>
 
       <main className="py-8">
-        <div className="max-w-7xl mx-auto px-6 mb-8">
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Latest Activities
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Catch up with the latest stories from the Rover Scout community.
-          </p>
-        </div>
-
         <Feed />
       </main>
 
