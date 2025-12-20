@@ -1,6 +1,7 @@
 
 import { Feed } from './components/Feed';
 import { Compass } from 'lucide-react';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <p>&copy; {new Date().getFullYear()} RoverPort Viewer. Unofficial Viewer App.</p>
         </div>
       </footer>
+      <PWAInstallPrompt />
     </div>
   );
 }
