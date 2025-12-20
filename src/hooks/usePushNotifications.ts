@@ -14,13 +14,19 @@ export const usePushNotifications = () => {
     const requestPermission = async () => {
         try {
             if (Notification.permission === 'granted') {
+                console.log('Permission already granted, requesting token...');
                 const token = await requestForToken(VAPID_KEY);
+                console.log('Token received:', token);
                 if (token) setFcmToken(token);
             } else {
+                console.log('Requesting permission...');
                 const permission = await Notification.requestPermission();
+                console.log('Permission result:', permission);
                 setNotificationPermission(permission);
                 if (permission === 'granted') {
+                    console.log('Permission granted, requesting token...');
                     const token = await requestForToken(VAPID_KEY);
+                    console.log('Token received:', token);
                     if (token) setFcmToken(token);
                 }
             }
