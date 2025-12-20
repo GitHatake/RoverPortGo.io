@@ -15,11 +15,25 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
-export const messaging = getMessaging(app);
+
+let messagingInstance: any = null;
+try {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+        messagingInstance = getMessaging(app);
+    }
+} catch (e) {
+    console.warn('Firebase Messaging not supported:', e);
+}
+
+export const messaging = messagingInstance;
 
 export const VAPID_KEY = "BEDZrD84DtgL4NvnxjI_kSLDKxEGXr-bD-ptAE8KaSJkvp9qvPJ_22Cil-5QGYyVJRvl4F6sjTy8z7AZPl7pXdU";
 
 export const requestForToken = async (vapidKey: string) => {
+    if (!messaging) {
+        console.log("Messaging not supported.");
+        return null;
+    }
     try {
         // Wait for the main Service Worker (which now includes FCM logic) to be ready
         const registration = await navigator.serviceWorker.ready;
@@ -44,6 +58,10 @@ export const requestForToken = async (vapidKey: string) => {
 
 export const onMessageListener = () =>
     new Promise((resolve) => {
+        if (!messaging) {
+            resolve(null);
+            return;
+        }
         onMessage(messaging, (payload) => {
             resolve(payload);
         });

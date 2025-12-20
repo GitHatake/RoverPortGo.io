@@ -3,10 +3,15 @@ import { requestForToken, onMessageListener } from '../lib/firebase';
 import { VAPID_KEY } from '../lib/firebase';
 
 export const usePushNotifications = () => {
-    const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(Notification.permission);
+    const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
     const [fcmToken, setFcmToken] = useState<string | null>(localStorage.getItem('fcm_token'));
 
     useEffect(() => {
+        if (!('Notification' in window)) {
+            console.warn("This browser does not support desktop notification");
+            return;
+        }
+
         // Double check permission on mount (state init covers most cases, but good for safety)
         const currentPermission = Notification.permission;
         setNotificationPermission(currentPermission);
@@ -39,6 +44,11 @@ export const usePushNotifications = () => {
     }, []);
 
     const requestPermission = async (): Promise<string | null> => {
+        if (!('Notification' in window)) {
+            alert('Your browser does not support notifications.');
+            return null;
+        }
+
         try {
             let token: string | null = null;
             if (Notification.permission === 'granted') {
@@ -71,21 +81,15 @@ export const usePushNotifications = () => {
     useEffect(() => {
         // Listen for foreground messages
         onMessageListener().then((payload: any) => {
+            if (!payload) return; // Listener might return null if unsupported
             console.log('Foreground message received:', payload);
-            // You can show a toast here if you want
-            // For now, we rely on system notifications which show up if app is in background,
-            // or we can manually trigger a notification or UI alert for foreground.
-            if (payload?.notification) {
+            if (payload?.notification && 'Notification' in window) {
                 new Notification(payload.notification.title, {
                     body: payload.notification.body,
                     icon: '/pwa-192x192.png',
                 });
             }
-        });
-
-        // Note: onMessageListener returns a promise that resolves to payload, 
-        // but the actual listener set up inside firebase.ts might need valid unsubscription handling 
-        // if implemented strictly. For this simple implementation, valid enough.
+        }).catch(err => console.log("Message listener error (safe ignore):", err));
 
         return () => {
             // Cleanup if needed
