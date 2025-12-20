@@ -24,12 +24,17 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
             transition={{ duration: 0.3 }}
             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full border border-gray-100 dark:border-gray-700"
         >
-            <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+            <a
+                href={post.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700 group"
+            >
                 {imageUrl ? (
                     <img
                         src={imageUrl}
                         alt={featuredMedia?.alt_text || post.title.rendered}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800">
@@ -44,7 +49,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
                         </span>
                     ))}
                 </div>
-            </div>
+            </a>
 
             <div className="p-5 flex flex-col flex-grow">
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2 line-clamp-2 leading-tight">
