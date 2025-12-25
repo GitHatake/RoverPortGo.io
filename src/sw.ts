@@ -1,13 +1,58 @@
 /// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
+import { clientsClaim, setCacheNameDetails } from 'workbox-core'
 
 declare let self: ServiceWorkerGlobalScope
+declare let firebase: any
+
+self.skipWaiting()
+clientsClaim()
 declare let firebase: any
 
 cleanupOutdatedCaches()
 
 // Precache resources
 precacheAndRoute(self.__WB_MANIFEST)
+
+// Runtime Caching for Images
+import { registerRoute } from 'workbox-routing'
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { ExpirationPlugin } from 'workbox-expiration'
+
+// Cache Images (CacheFirst)
+registerRoute(
+    ({ request }) => request.destination === 'image',
+    new CacheFirst({
+        cacheName: 'images',
+        plugins: [
+            new CacheableResponsePlugin({
+                statuses: [0, 200],
+            }),
+            new ExpirationPlugin({
+                maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+            }),
+        ],
+    })
+);
+
+// Cache API (StaleWhileRevalidate) - Fallback for context mechanism
+registerRoute(
+    ({ url }) => url.origin === 'https://roverport.rcjweb.jp' && url.pathname.includes('/wp-json/'),
+    new StaleWhileRevalidate({
+        cacheName: 'api-cache',
+        plugins: [
+            new CacheableResponsePlugin({
+                statuses: [0, 200],
+            }),
+            new ExpirationPlugin({
+                maxEntries: 100,
+                maxAgeSeconds: 24 * 60 * 60, // 24 Hours
+            }),
+        ],
+    })
+);
 
 // ==========================================
 // Firebase Messaging Handling
