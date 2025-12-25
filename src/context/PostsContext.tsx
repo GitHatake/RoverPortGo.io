@@ -21,20 +21,24 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const loadCache = () => {
+        const loadCache = (): boolean => {
             const cachedPosts = localStorage.getItem('rp_posts_cache');
             if (cachedPosts) {
                 try {
                     const parsed = JSON.parse(cachedPosts);
-                    setPosts(parsed);
-                    // Also derive attributes from cache immediately
-                    deriveAndSetAttributes(parsed);
-                    setLoading(false); // Show content immediately!
-                    console.log("Loaded posts from cache.");
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        setPosts(parsed);
+                        // Also derive attributes from cache immediately
+                        deriveAndSetAttributes(parsed);
+                        setLoading(false); // Show content immediately!
+                        console.log("Loaded posts from cache.");
+                        return true;
+                    }
                 } catch (e) {
                     console.warn("Invalid cache", e);
                 }
             }
+            return false;
         };
 
         const deriveAndSetAttributes = (postsData: Post[]) => {
@@ -61,10 +65,12 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             setTags(Array.from(uniqueTags.values()));
         };
 
-        const fetchFreshData = async () => {
+        const fetchFreshData = async (hasCache: boolean) => {
             try {
-                // If no cache, ensure loading is true
-                if (posts.length === 0) setLoading(true);
+                // If no cache was loaded, we must show loading spinner
+                if (!hasCache) {
+                    setLoading(true);
+                }
 
                 // Fetch a large batch once
                 const response = await axios.get<Post[]>(
@@ -79,15 +85,19 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 console.log("Fetched fresh posts.");
 
             } catch (err) {
-                setError('Failed to fetch posts');
+                // If we have cache, an error is fine, just log it. 
+                // If we don't have cache, we should show error.
+                if (!hasCache) {
+                    setError('Failed to fetch posts');
+                }
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        loadCache();
-        fetchFreshData();
+        const hasCache = loadCache();
+        fetchFreshData(hasCache);
     }, []);
 
     return (
