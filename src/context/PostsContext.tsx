@@ -21,37 +21,62 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchAllData = async () => {
+        const loadCache = () => {
+            const cachedPosts = localStorage.getItem('rp_posts_cache');
+            if (cachedPosts) {
+                try {
+                    const parsed = JSON.parse(cachedPosts);
+                    setPosts(parsed);
+                    // Also derive attributes from cache immediately
+                    deriveAndSetAttributes(parsed);
+                    setLoading(false); // Show content immediately!
+                    console.log("Loaded posts from cache.");
+                } catch (e) {
+                    console.warn("Invalid cache", e);
+                }
+            }
+        };
+
+        const deriveAndSetAttributes = (postsData: Post[]) => {
+            // Derive Authors
+            const uniqueAuthors = new Map<number, WPAuthor>();
+            postsData.forEach(post => {
+                const author = post._embedded?.author?.[0];
+                if (author && !uniqueAuthors.has(author.id)) {
+                    uniqueAuthors.set(author.id, author);
+                }
+            });
+            setAuthors(Array.from(uniqueAuthors.values()));
+
+            // Derive Tags
+            const uniqueTags = new Map<number, WPTerm>();
+            postsData.forEach(post => {
+                const terms = post._embedded?.['wp:term']?.flat() || [];
+                terms.forEach((term: WPTerm) => {
+                    if (term.taxonomy === 'post_tag' && !uniqueTags.has(term.id)) {
+                        uniqueTags.set(term.id, term);
+                    }
+                });
+            });
+            setTags(Array.from(uniqueTags.values()));
+        };
+
+        const fetchFreshData = async () => {
             try {
-                setLoading(true);
+                // If no cache, ensure loading is true
+                if (posts.length === 0) setLoading(true);
+
                 // Fetch a large batch once
                 const response = await axios.get<Post[]>(
                     'https://roverport.rcjweb.jp/wp-json/wp/v2/posts?_embed&per_page=100'
                 );
                 const fetchedPosts = response.data;
+
+                // Update state and cache
                 setPosts(fetchedPosts);
-
-                // Derive Authors
-                const uniqueAuthors = new Map<number, WPAuthor>();
-                fetchedPosts.forEach(post => {
-                    const author = post._embedded?.author?.[0];
-                    if (author && !uniqueAuthors.has(author.id)) {
-                        uniqueAuthors.set(author.id, author);
-                    }
-                });
-                setAuthors(Array.from(uniqueAuthors.values()));
-
-                // Derive Tags
-                const uniqueTags = new Map<number, WPTerm>();
-                fetchedPosts.forEach(post => {
-                    const terms = post._embedded?.['wp:term']?.flat() || [];
-                    terms.forEach((term: WPTerm) => {
-                        if (term.taxonomy === 'post_tag' && !uniqueTags.has(term.id)) {
-                            uniqueTags.set(term.id, term);
-                        }
-                    });
-                });
-                setTags(Array.from(uniqueTags.values()));
+                deriveAndSetAttributes(fetchedPosts);
+                localStorage.setItem('rp_posts_cache', JSON.stringify(fetchedPosts));
+                console.log("Fetched fresh posts.");
 
             } catch (err) {
                 setError('Failed to fetch posts');
@@ -61,7 +86,8 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             }
         };
 
-        fetchAllData();
+        loadCache();
+        fetchFreshData();
     }, []);
 
     return (
