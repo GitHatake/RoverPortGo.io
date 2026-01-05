@@ -40,7 +40,7 @@ export const Feed: React.FC = () => {
                     <p>No posts found matching your filters.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
+                <div className="grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
                     {posts.map((post) => (
                         <PostCard key={post.id} post={post} />
                     ))}
