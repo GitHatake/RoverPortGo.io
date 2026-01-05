@@ -22,7 +22,7 @@ function App() {
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
               title="Visit Original Site"
             >
-              <img src="/roverport-icon.png" alt="RoverPort" className="w-8 h-8 rounded-full" />
+              <img src={`${import.meta.env.BASE_URL}roverport-icon.png`} alt="RoverPort" className="w-8 h-8 rounded-full" />
             </a>
           </div>
         </div>
