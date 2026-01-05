@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, Calendar, Users, Hash } from 'lucide-react';
+import { Calendar, Users } from 'lucide-react';
 import type { WPAuthor, WPTerm } from '../types';
 import type { PostFilter } from '../types/filters';
 
@@ -11,6 +11,12 @@ interface FilterBarProps {
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({ authors, tags, filter, onFilterChange }) => {
+    const handleChange = (key: keyof PostFilter, value: any) => {
+        const newFilter = { ...filter, [key]: value };
+        if (!value) delete newFilter[key as keyof PostFilter]; // Remove empty keys
+        onFilterChange(newFilter);
+    };
+
     const activeTagId = filter.tag;
 
     return (
