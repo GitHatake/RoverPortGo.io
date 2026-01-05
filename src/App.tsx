@@ -19,9 +19,10 @@ function App() {
               href="https://roverport.rcjweb.jp/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
+              title="Visit Original Site"
             >
-              Visit Original Site &rarr;
+              <img src="/roverport-icon.png" alt="RoverPort" className="w-8 h-8 rounded-full" />
             </a>
           </div>
         </div>

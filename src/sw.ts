@@ -1,13 +1,11 @@
-/// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
-import { clientsClaim, setCacheNameDetails } from 'workbox-core'
+import { clientsClaim } from 'workbox-core'
 
-declare let self: ServiceWorkerGlobalScope
+declare let self: any
 declare let firebase: any
 
 self.skipWaiting()
 clientsClaim()
-declare let firebase: any
 
 cleanupOutdatedCaches()
 
@@ -57,7 +55,9 @@ registerRoute(
 // ==========================================
 // Firebase Messaging Handling
 // ==========================================
+// @ts-ignore
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
+// @ts-ignore
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
 
 const firebaseConfig = {
