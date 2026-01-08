@@ -88,7 +88,8 @@ function sendPushNotification(post) {
     const ss = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ss.getSheets()[0];
     const data = sheet.getDataRange().getValues();
-    const tokens = data.map(row => row[0]).filter(t => t && t.length > 10); // 簡易バリデーション
+    const rawTokens = data.map(row => row[0]).filter(t => t && t.length > 10);
+    const tokens = [...new Set(rawTokens)]; // 重複排除
 
     if (tokens.length === 0) return;
 
