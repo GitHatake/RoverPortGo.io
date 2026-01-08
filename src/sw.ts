@@ -76,12 +76,9 @@ try {
 
     messaging.onBackgroundMessage((payload: any) => {
         console.log('[sw] Received background message ', payload);
-        const notificationTitle = payload.notification.title;
-        const notificationOptions = {
-            body: payload.notification.body,
-            icon: '/pwa-192x192.png'
-        };
-        self.registration.showNotification(notificationTitle, notificationOptions);
+        // Firebase SDK automatically handles 'notification' payload. 
+        // We do NOT need to manually showNotification here unless we use 'data' only payload.
+        // Showing it manually here causes DUPLICATE notifications.
     });
 } catch (e) {
     console.warn('Firebase init failed in SW (likely offline or config error)', e);
