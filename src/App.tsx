@@ -3,6 +3,7 @@ import { Feed } from './components/Feed';
 import { Compass } from 'lucide-react';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { NotificationButton } from './components/NotificationButton';
+import { ReloadPrompt } from './components/ReloadPrompt';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         </div>
       </footer>
       <PWAInstallPrompt />
+      <ReloadPrompt />
     </div>
   );
 }

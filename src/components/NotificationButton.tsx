@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, BellOff, Loader2, Download } from 'lucide-react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { usePWA } from '../hooks/usePWA';
@@ -12,6 +12,28 @@ export const NotificationButton = () => {
     const { requestPermission, notificationPermission, fcmToken } = usePushNotifications();
     const [isRegistering, setIsRegistering] = useState(false);
     const isPWA = usePWA();
+
+    // Automatically sync token to backend if it changes in the background
+    useEffect(() => {
+        const syncTokenBackground = async () => {
+            if (fcmToken && notificationPermission === 'granted') {
+                const synced = localStorage.getItem('fcm_token_synced');
+                if (synced !== fcmToken) {
+                    console.log("Token changed, syncing in background...");
+                    try {
+                        await axios.post(REGISTER_API_URL, JSON.stringify({ token: fcmToken }), {
+                            headers: { 'Content-Type': 'text/plain' }
+                        });
+                        localStorage.setItem('fcm_token_synced', fcmToken);
+                        console.log("Background token sync complete.");
+                    } catch (e) {
+                        console.error("Background token sync failed", e);
+                    }
+                }
+            }
+        };
+        syncTokenBackground();
+    }, [fcmToken, notificationPermission]);
 
     const handleClick = async () => {
         // If not in PWA or Notification API not supported, guide user to install
@@ -37,6 +59,7 @@ export const NotificationButton = () => {
                 await axios.post(REGISTER_API_URL, JSON.stringify({ token: token }), {
                     headers: { 'Content-Type': 'text/plain' }
                 });
+                localStorage.setItem('fcm_token_synced', token);
                 alert("通知設定を完了しました！");
             } else {
                 console.warn("Could not get token or backend URL missing");
@@ -57,8 +80,8 @@ export const NotificationButton = () => {
             onClick={handleClick}
             disabled={isRegistering}
             className={`p-2 rounded-full transition-colors relative ${isEnabled
-                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
-                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
+                : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
             title={isEnabled ? "Notifications Enabled" : (isSupported ? "Enable Notifications" : "Install App to Enable Notifications")}
         >
