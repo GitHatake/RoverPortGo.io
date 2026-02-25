@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, BellOff, Loader2, Download } from 'lucide-react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { usePWA } from '../hooks/usePWA';

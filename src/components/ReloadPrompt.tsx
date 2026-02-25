@@ -1,3 +1,4 @@
+// @ts-ignore - virtual module provided by vite-plugin-pwa
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { RefreshCcw, X } from 'lucide-react';
 
@@ -6,7 +7,7 @@ export const ReloadPrompt = () => {
         needRefresh: [needRefresh, setNeedRefresh],
         updateServiceWorker,
     } = useRegisterSW({
-        onRegistered(r) {
+        onRegistered(r: any) {
             console.log('SW Registered: ' + r);
             // Check for updates every hour
             if (r) {
@@ -15,7 +16,7 @@ export const ReloadPrompt = () => {
                 }, 60 * 60 * 1000);
             }
         },
-        onRegisterError(error) {
+        onRegisterError(error: any) {
             console.log('SW registration error', error);
         },
     });
